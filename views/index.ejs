@@ -123,28 +123,28 @@
 
     <div class="main-content">
       <!-- App Version Tab -->
-      <div id="app-version" class="tab-content active">
+      <div id="app-version" class="tab-content">
         <h2>Manage App Versions</h2>
-        <br>
+        <br />
         <!-- Display latest app version -->
         <div id="latest-version-container">
           <strong>Latest App Version:</strong>
           <span id="latest-app-version">Fetching...</span>
           <span id="latest-force-update">(Fetching...)</span>
         </div>
-        <br>
+        <br />
         <!-- Form to update app version -->
         <form id="update-version-form">
           <label for="appVersion">App Version:</label>
           <input type="text" id="appVersion" name="appVersion" required />
-      
+
           <label for="isForce">Force Update:</label>
           <input type="checkbox" id="isForce" name="isForce" />
-      
+
           <button type="submit">Submit</button>
         </form>
       </div>
-      
+
       <script>
         // Fetch the latest app version and pre-fill the form
         fetch("/api/appversion/latest")
@@ -157,54 +157,58 @@
                 data.isForce === "true"
                   ? " (Force Update Enabled)"
                   : " (No Force Update)";
-      
+
               // Pre-fill the form fields
               document.getElementById("appVersion").value = data.appVersion;
-              document.getElementById("isForce").checked = data.isForce === "true";
+              document.getElementById("isForce").checked =
+                data.isForce === "true";
             }
           })
           .catch(() => {
             document.getElementById("latest-app-version").textContent =
               "Error fetching latest version.";
           });
-      
+
         // Handle form submission
-        document.getElementById("update-version-form").addEventListener("submit", function (e) {
-          e.preventDefault();
-      
-          const appVersion = document.getElementById("appVersion").value;
-          const isForce = document.getElementById("isForce").checked ? "true" : "false";
-      
-          fetch("/api/appversion/update-latest", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              appVersion,
-              isForce,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.message) {
-                alert(data.message); // Show response message in alert
-              } else {
-                alert("An error occurred while updating the app version.");
-              }
+        document
+          .getElementById("update-version-form")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const appVersion = document.getElementById("appVersion").value;
+            const isForce = document.getElementById("isForce").checked
+              ? "true"
+              : "false";
+
+            fetch("/api/appversion/update-latest", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                appVersion,
+                isForce,
+              }),
             })
-            .catch(() => {
-              alert("An error occurred. Please try again.");
-            });
-        });
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.message) {
+                  alert(data.message); // Show response message in alert
+                } else {
+                  alert("An error occurred while updating the app version.");
+                }
+              })
+              .catch(() => {
+                alert("An error occurred. Please try again.");
+              });
+          });
       </script>
-      
 
       <!-- Show AD Tab -->
       <div id="show-ad" class="tab-content">
         <h2>Show Advertisement</h2>
         <br />
-      
+
         <!-- Form to Add or Update Ads -->
         <form id="uploadAdForm" enctype="multipart/form-data">
           <label for="adImage">Select an image (JPG/PNG, max 2 MB):</label>
@@ -228,14 +232,14 @@
           <input type="hidden" id="adId" name="adId" />
           <button type="submit">Upload</button>
         </form>
-      
+
         <hr />
-      
+
         <!-- Section to Display Ads -->
         <h3>Current Advertisements</h3>
         <div id="adList"></div>
       </div>
-      
+
       <script>
         // Fetch and display ads
         function fetchAds() {
@@ -244,7 +248,7 @@
             .then((data) => {
               const adList = document.getElementById("adList");
               adList.innerHTML = ""; // Clear previous content
-      
+
               data.response.forEach((ad) => {
                 const adDiv = document.createElement("div");
                 adDiv.classList.add("ad-item");
@@ -261,14 +265,14 @@
               alert("Failed to fetch ads: " + error.message);
             });
         }
-      
+
         // Populate form for editing an ad
         function editAd(adId, adLink) {
           document.getElementById("adId").value = adId;
           document.getElementById("adLink").value = adLink;
           document.getElementById("adImage").value = ""; // Clear file input (browser security)
         }
-      
+
         // Delete an ad
         function deleteAd(adId) {
           fetch(`/api/showad/delete`, {
@@ -287,59 +291,201 @@
               alert("Failed to delete ad: " + error.message);
             });
         }
-      
+
         // Handle form submission for adding/updating ads
-        document.getElementById("uploadAdForm").addEventListener("submit", (event) => {
-          event.preventDefault();
-      
-          const adImage = document.getElementById("adImage").files[0];
-          const adLink = document.getElementById("adLink").value;
-          const adId = document.getElementById("adId").value;
-      
-          // Validate file size (must be 2 MB or smaller)
-          if (adImage && adImage.size > 2 * 1024 * 1024) {
-            alert("Image size must be 2 MB or smaller.");
-            return;
-          }
-      
-          const formData = new FormData();
-          formData.append("target_url", adLink);
-          if (adImage) {
-            formData.append("image_url", adImage);
-          }
-          if (adId) {
-            formData.append("ShowAdID", adId); // If updating, include the ad ID
-          }
-      
-          const endpoint = adId ? "/api/showad/update" : "/api/showad/store";
-      
-          // Send form data
-          fetch(endpoint, {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              alert(data.message || "Ad saved successfully!");
-              document.getElementById("uploadAdForm").reset(); // Clear form
-              fetchAds(); // Refresh the ad list
+        document
+          .getElementById("uploadAdForm")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const adImage = document.getElementById("adImage").files[0];
+            const adLink = document.getElementById("adLink").value;
+            const adId = document.getElementById("adId").value;
+
+            // Validate file size (must be 2 MB or smaller)
+            if (adImage && adImage.size > 2 * 1024 * 1024) {
+              alert("Image size must be 2 MB or smaller.");
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("target_url", adLink);
+            if (adImage) {
+              formData.append("image_url", adImage);
+            }
+            if (adId) {
+              formData.append("ShowAdID", adId); // If updating, include the ad ID
+            }
+
+            const endpoint = adId ? "/api/showad/update" : "/api/showad/store";
+
+            // Send form data
+            fetch(endpoint, {
+              method: "POST",
+              body: formData,
             })
-            .catch((error) => {
-              alert("An error occurred: " + error.message);
-            });
-        });
-      
+              .then((response) => response.json())
+              .then((data) => {
+                alert(data.message || "Ad saved successfully!");
+                document.getElementById("uploadAdForm").reset(); // Clear form
+                fetchAds(); // Refresh the ad list
+              })
+              .catch((error) => {
+                alert("An error occurred: " + error.message);
+              });
+          });
+
         // Initial fetch of ads
         fetchAds();
       </script>
-      
-      
 
       <!-- Templates Tab Placeholder -->
-      <div id="templates" class="tab-content">
-        <h2>Templates (Coming Soon)</h2>
-      </div>
-    </div>
+      <div id="templates" class="tab-content active">
+        <h2>Manage Templates</h2>
+        <br />
+        <!-- Form to Add or Update Templates -->
+  <form id="templateForm">
+    <label for="templateName">Template Name:</label>
+    <input type="text" id="templateName" name="templateName" placeholder="Enter template name" required />
+    <br /><br />
+    <label for="templateCategory">Category:</label>
+    <input type="text" id="templateCategory" name="templateCategory" placeholder="Enter category" required />
+    <br /><br />
+    <label for="jsonData">JSON Data:</label>
+    <textarea id="jsonData" name="jsonData" rows="8" placeholder="Enter JSON data" required></textarea>
+    <input type="hidden" id="templateId" name="templateId" />
+    <br /><br />
+    <button type="submit">Save Template</button>
+  </form>
+
+  <hr />
+
+  <!-- Section to Display Templates -->
+  <h3>Current Templates</h3>
+  <div id="templateList"></div>
+</div>
+
+<script>
+  function fetchTemplates() {
+  const templateList = document.getElementById("templateList");
+  
+    // Show loading message while fetching templates
+    templateList.innerHTML = "<p>Loading templates...</p>";
+
+    fetch("/api/template")
+        .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+        })
+        .then((data) => {
+        templateList.innerHTML = ""; // Clear the loading message
+
+        // Access the templates from the "data" field
+        const templates = data.data || []; 
+
+        if (templates.length === 0) {
+            templateList.innerHTML = "<p>No templates found.</p>";
+            return;
+        }
+
+        templates.forEach((template) => {
+            const templateDiv = document.createElement("div");
+            templateDiv.classList.add("template-item");
+
+            templateDiv.innerHTML = `
+            <p><strong>Name:</strong> ${template.name}</p>
+            <p><strong>Category:</strong> ${template.templateCategory}</p>
+            <p><strong>JSON Data:</strong> ${template.jsonData}</p>
+            <button onclick="editTemplate('${template._id}', '${template.name}', '${template.templateCategory}', '${template.jsonData}')">Edit</button>
+            <button onclick="deleteTemplate('${template._id}')">Delete</button>
+            <hr />
+            `;
+            templateList.appendChild(templateDiv);
+        });
+        })
+        .catch((error) => {
+        templateList.innerHTML = `<p class="error">Failed to fetch templates: ${error.message}</p>`;
+        });
+    }
+
+
+  // Populate form for editing a template
+  function editTemplate(templateId, templateName, templateCategory, jsonData) {
+    document.getElementById("templateID").value = templateId;
+    document.getElementById("name").value = templateName;
+    document.getElementById("templateCategory").value = templateCategory;
+    document.getElementById("jsonData").value = jsonData;
+  }
+
+  // Delete a template
+  function deleteTemplate(templateId) {
+    fetch(`/api/template/delete`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ templateID: templateId }) // Using 'templateID' as per your format
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        alert(data.message || "Template deleted successfully!");
+        fetchTemplates(); // Refresh the template list
+    })
+    .catch((error) => {
+        console.error("Error response:", error);
+        alert("Failed to delete template: " + error.message);
+    });
+}
+
+
+
+
+  // Handle form submission for adding/updating templates
+  document.getElementById("templateForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const templateName = document.getElementById("templateName").value;
+    const templateCategory = document.getElementById("templateCategory").value;
+    const jsonData = document.getElementById("jsonData").value;
+    const templateId = document.getElementById("templateId").value;
+
+    const formData = {
+      name: templateName,
+      templateCategory,
+      jsonData,
+    };
+    if (templateId) formData.templateId = templateId;
+
+    const endpoint = templateId ? "/api/template/update" : "/api/template/store";
+
+    fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        alert(data.message || "Template saved successfully!");
+        document.getElementById("templateForm").reset(); // Clear form
+        fetchTemplates(); // Refresh the template list
+      })
+      .catch((error) => {
+        alert("An error occurred: " + error.message);
+      });
+  });
+
+  // Initial fetch of templates
+  fetchTemplates();
+</script>
 
     <script>
       function showTab(tabId) {
