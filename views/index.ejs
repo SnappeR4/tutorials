@@ -233,38 +233,157 @@
           <button type="submit">Upload</button>
         </form>
 
-        <hr />
+        <!-- <hr /> -->
 
         <!-- Section to Display Ads -->
+        <br/>
         <h3>Current Advertisements</h3>
+        <br/>
         <div id="adList"></div>
       </div>
 
       <script>
-        // Fetch and display ads
-        function fetchAds() {
-          fetch("/api/showad")
-            .then((response) => response.json())
-            .then((data) => {
-              const adList = document.getElementById("adList");
-              adList.innerHTML = ""; // Clear previous content
+  // Add styling dynamically
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .ad-item {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+    }
 
-              data.response.forEach((ad) => {
-                const adDiv = document.createElement("div");
-                adDiv.classList.add("ad-item");
-                adDiv.innerHTML = `
-                  <img src="${ad.image_url}" alt="Ad Image" width="150" />
-                  <p>Ad Link: <a href="${ad.target_url}" target="_blank">${ad.target_url}</a></p>
-                  <button onclick="editAd('${ad._id}', '${ad.target_url}')">Edit</button>
-                  <button onclick="deleteAd('${ad._id}')">Delete</button>
-                `;
-                adList.appendChild(adDiv);
-              });
-            })
-            .catch((error) => {
-              alert("Failed to fetch ads: " + error.message);
-            });
-        }
+    .ad-item img {
+      border-radius: 8px;
+      margin-right: 16px;
+      max-width: 150px;
+      height: auto;
+    }
+
+    .ad-details {
+      flex: 1;
+    }
+
+    .ad-details a {
+      color: #007BFF;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .ad-details a:hover {
+      text-decoration: underline;
+    }
+
+    .ad-item button {
+      padding: 8px 12px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .ad-item button.edit-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .ad-item button.delete-btn {
+      background-color: #FF4B4B;
+      color: white;
+    }
+
+    .ad-item button:hover {
+      opacity: 0.9;
+    }
+
+    .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 16px;
+  }
+
+  .styled-table th,
+  .styled-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .styled-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+
+  .styled-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .styled-table tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .edit-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .delete-btn {
+    background-color: #FF4B4B;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .edit-btn:hover,
+  .delete-btn:hover {
+    opacity: 0.9;
+  }
+  `;
+  document.head.appendChild(style);
+
+  // Fetch and display ads
+  function fetchAds() {
+    fetch("/api/showad")
+      .then((response) => response.json())
+      .then((data) => {
+        const adList = document.getElementById("adList");
+        adList.innerHTML = ""; // Clear previous content
+
+        data.response.forEach((ad) => {
+          const adDiv = document.createElement("div");
+          adDiv.classList.add("ad-item");
+          adDiv.innerHTML = `
+            <img src="${ad.image_url}" alt="Ad Image" />
+            <div class="ad-details">
+              <p>Ad Link: <a href="${ad.target_url}" target="_blank">${ad.target_url}</a></p>
+            </div>
+            <div>
+              <button class="edit-btn" onclick="editAd('${ad._id}', '${ad.target_url}')">Edit</button>
+              <button class="delete-btn" onclick="deleteAd('${ad._id}')">Delete</button>
+            </div>
+          `;
+          adList.appendChild(adDiv);
+        });
+      })
+      .catch((error) => {
+        alert("Failed to fetch ads: " + error.message);
+      });
+  }
 
         // Populate form for editing an ad
         function editAd(adId, adLink) {
@@ -344,31 +463,37 @@
         <h2>Manage Templates</h2>
         <br />
         <!-- Form to Add or Update Templates -->
-  <form id="templateForm">
-    <label for="templateName">Template Name:</label>
-    <input type="text" id="templateName" name="templateName" placeholder="Enter template name" required />
-    <br /><br />
-    <label for="templateCategory">Category:</label>
-    <input type="text" id="templateCategory" name="templateCategory" placeholder="Enter category" required />
-    <br /><br />
-    <label for="jsonData">JSON Data:</label>
-    <textarea id="jsonData" name="jsonData" rows="8" placeholder="Enter JSON data" required></textarea>
-    <input type="hidden" id="templateId" name="templateId" />
-    <br /><br />
-    <button type="submit">Save Template</button>
-  </form>
+        <form id="templateForm">
+            <label for="templateName">Template Name:</label>
+            <input type="text" id="templateName" name="templateName" placeholder="Enter template name" required />
+            <br /><br />
+            <label for="templateCategory">Category:</label>
+            <input type="text" id="templateCategory" name="templateCategory" placeholder="Enter category" required />
+            <br /><br />
+            <label for="jsonData">JSON Data:</label>
+            <textarea id="jsonData" name="jsonData" rows="8" placeholder="Enter JSON data" required></textarea>
+            <input type="hidden" id="templateId" name="templateId" />
+            <br /><br />
+            <button type="submit">Save Template</button>
+        </form>
 
-  <hr />
+  <!-- <hr /> -->
 
   <!-- Section to Display Templates -->
+  <br/>
   <h3>Current Templates</h3>
+  <br/>
+  <input type="text" id="searchInput" placeholder="Search by name or category" oninput="filterTemplates()" />
+  <br/><br/>
   <div id="templateList"></div>
-</div>
+    </div>
 
-<script>
-  function fetchTemplates() {
-  const templateList = document.getElementById("templateList");
-  
+    <script>
+    let allTemplates = []; // Store all fetched templates
+
+    function fetchTemplates() {
+    const templateList = document.getElementById("templateList");
+
     // Show loading message while fetching templates
     templateList.innerHTML = "<p>Loading templates...</p>";
 
@@ -382,110 +507,146 @@
         .then((data) => {
         templateList.innerHTML = ""; // Clear the loading message
 
-        // Access the templates from the "data" field
-        const templates = data.data || []; 
+        allTemplates = data.data || []; // Store all templates
 
-        if (templates.length === 0) {
+        if (allTemplates.length === 0) {
             templateList.innerHTML = "<p>No templates found.</p>";
             return;
         }
 
-        templates.forEach((template) => {
-            const templateDiv = document.createElement("div");
-            templateDiv.classList.add("template-item");
-
-            templateDiv.innerHTML = `
-            <p><strong>Name:</strong> ${template.name}</p>
-            <p><strong>Category:</strong> ${template.templateCategory}</p>
-            <p><strong>JSON Data:</strong> ${template.jsonData}</p>
-            <button onclick="editTemplate('${template._id}', '${template.name}', '${template.templateCategory}', '${template.jsonData}')">Edit</button>
-            <button onclick="deleteTemplate('${template._id}')">Delete</button>
-            <hr />
-            `;
-            templateList.appendChild(templateDiv);
-        });
+        renderTemplates(allTemplates); // Render the initial template list
         })
         .catch((error) => {
         templateList.innerHTML = `<p class="error">Failed to fetch templates: ${error.message}</p>`;
         });
     }
 
+    function renderTemplates(templates) {
+    const templateList = document.getElementById("templateList");
+    templateList.innerHTML = ""; // Clear previous templates
 
-  // Populate form for editing a template
-  function editTemplate(templateId, templateName, templateCategory, jsonData) {
-    document.getElementById("templateID").value = templateId;
-    document.getElementById("name").value = templateName;
-    document.getElementById("templateCategory").value = templateCategory;
-    document.getElementById("jsonData").value = jsonData;
-  }
+    // Create a table element
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.classList.add("styled-table");
+    
+    table.innerHTML = `
+        <thead>
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Category</th>
+            <th style="border: 1px solid #ddd; padding: 8px; ">JSON Data</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    `;
 
-  // Delete a template
-  function deleteTemplate(templateId) {
-    fetch(`/api/template/delete`, {
+    const tbody = table.querySelector("tbody");
+
+    templates.forEach((template) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td style="border: 1px solid #ddd; padding: 8px;">${template.name}</td>
+        <td style="border: 1px solid #ddd; padding: 8px;">${template.templateCategory}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${template.jsonData}
+        </td>
+        <td style="border: 1px solid #ddd; padding: 8px;">
+            <button class="edit-btn" onclick="editTemplate('${template._id}', '${template.name}', '${template.templateCategory}', '${encodeURIComponent(template.jsonData)}')">Edit</button>
+            <button class="delete-btn" onclick="deleteTemplate('${template._id}')">Delete</button>
+        </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    templateList.appendChild(table);
+    }
+
+    // Filter templates based on search input
+    function filterTemplates() {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    const filteredTemplates = allTemplates.filter((template) => 
+        template.name.toLowerCase().includes(searchInput) || 
+        template.templateCategory.toLowerCase().includes(searchInput)
+    );
+    renderTemplates(filteredTemplates); // Re-render the filtered templates
+    }
+
+    // Populate form for editing a template
+    function editTemplate(templateId, templateName, templateCategory, jsonData) {
+        document.getElementById("templateId").value = templateId;
+        document.getElementById("templateName").value = templateName;
+        document.getElementById("templateCategory").value = templateCategory;
+        document.getElementById("jsonData").value = jsonData;
+    }
+
+    // Delete a template
+    function deleteTemplate(templateId) {
+        fetch(`/api/template/delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ templateID: templateId }) // Using 'templateID' as per your format
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            alert(data.message || "Template deleted successfully!");
+            fetchTemplates(); // Refresh the template list
+        })
+        .catch((error) => {
+            console.error("Error response:", error);
+            alert("Failed to delete template: " + error.message);
+        });
+    }
+
+    // Handle form submission for adding/updating templates
+    document.getElementById("templateForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const templateName = document.getElementById("templateName").value;
+        const templateCategory = document.getElementById("templateCategory").value;
+        const jsonData = document.getElementById("jsonData").value;
+        const templateId = document.getElementById("templateId").value;
+
+        const formData = {
+        name: templateName,
+        templateCategory: templateCategory,
+        jsonData: jsonData,
+        };
+        if (templateId) formData.templateID = templateId;
+
+        const endpoint = templateId ? "/api/template/update" : "/api/template/store";
+
+        fetch(endpoint, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ templateID: templateId }) // Using 'templateID' as per your format
-    })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then((data) => {
-        alert(data.message || "Template deleted successfully!");
-        fetchTemplates(); // Refresh the template list
-    })
-    .catch((error) => {
-        console.error("Error response:", error);
-        alert("Failed to delete template: " + error.message);
+        body: JSON.stringify(formData),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            alert(data.message || "Template saved successfully!");
+            document.getElementById("templateForm").reset(); // Clear form
+            fetchTemplates(); // Refresh the template list
+        })
+        .catch((error) => {
+            alert("An error occurred: " + error.message);
+        });
     });
-}
 
-
-
-
-  // Handle form submission for adding/updating templates
-  document.getElementById("templateForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const templateName = document.getElementById("templateName").value;
-    const templateCategory = document.getElementById("templateCategory").value;
-    const jsonData = document.getElementById("jsonData").value;
-    const templateId = document.getElementById("templateId").value;
-
-    const formData = {
-      name: templateName,
-      templateCategory,
-      jsonData,
-    };
-    if (templateId) formData.templateId = templateId;
-
-    const endpoint = templateId ? "/api/template/update" : "/api/template/store";
-
-    fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        alert(data.message || "Template saved successfully!");
-        document.getElementById("templateForm").reset(); // Clear form
-        fetchTemplates(); // Refresh the template list
-      })
-      .catch((error) => {
-        alert("An error occurred: " + error.message);
-      });
-  });
-
-  // Initial fetch of templates
-  fetchTemplates();
-</script>
+    // Initial fetch of templates
+    fetchTemplates();
+    </script>
 
     <script>
       function showTab(tabId) {
