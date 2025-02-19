@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EasyLabel Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        display: flex;
+        height: 100vh;
+        background-color: #f4f4f9;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: white;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .sidebar h1 {
+        font-size: 24px;
+        margin-bottom: 30px;
+      }
+
+      .nav-links a {
+        display: block;
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .nav-links a:hover {
+        background-color: #34495e;
+      }
+
+      /* Main content */
+      .main-content {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+      }
+
+      /* Tabs */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Form Styling */
+      form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      label {
+        display: block;
+        margin: 15px 0 5px;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="checkbox"] {
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #2980b9;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #3498db;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h1>EasyLabel</h1>
+      <div class="nav-links">
+        <a href="#" id="app-version-tab" onclick="showTab('app-version')"
+          >App Version</a
+        >
+        <a href="#" id="show-ad-tab" onclick="showTab('show-ad')">Show AD</a>
+        <a href="#" id="templates-tab" onclick="showTab('templates')"
+          >Templates</a
+        >
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- App Version Tab -->
+      <div id="app-version" class="tab-content active">
+        <h2>Manage App Versions</h2>
+        <br>
+        <!-- Display latest app version -->
+        <div id="latest-version-container">
+          <strong>Latest App Version:</strong>
+          <span id="latest-app-version">Fetching...</span>
+          <span id="latest-force-update">(Fetching...)</span>
+        </div>
+        <br>
+        <!-- Form to update app version -->
+        <form id="update-version-form">
+          <label for="appVersion">App Version:</label>
+          <input type="text" id="appVersion" name="appVersion" required />
+      
+          <label for="isForce">Force Update:</label>
+          <input type="checkbox" id="isForce" name="isForce" />
+      
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      
+      <script>
+        // Fetch the latest app version and pre-fill the form
+        fetch("/api/appversion/latest")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.appVersion) {
+              document.getElementById("latest-app-version").textContent =
+                data.appVersion;
+              document.getElementById("latest-force-update").textContent =
+                data.isForce === "true"
+                  ? " (Force Update Enabled)"
+                  : " (No Force Update)";
+      
+              // Pre-fill the form fields
+              document.getElementById("appVersion").value = data.appVersion;
+              document.getElementById("isForce").checked = data.isForce === "true";
+            }
+          })
+          .catch(() => {
+            document.getElementById("latest-app-version").textContent =
+              "Error fetching latest version.";
+          });
+      
+        // Handle form submission
+        document.getElementById("update-version-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+      
+          const appVersion = document.getElementById("appVersion").value;
+          const isForce = document.getElementById("isForce").checked ? "true" : "false";
+      
+          fetch("/api/appversion/update-latest", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              appVersion,
+              isForce,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message) {
+                alert(data.message); // Show response message in alert
+              } else {
+                alert("An error occurred while updating the app version.");
+              }
+            })
+            .catch(() => {
+              alert("An error occurred. Please try again.");
+            });
+        });
+      </script>
+      
+
+      <!-- Show AD Tab -->
+      <div id="show-ad" class="tab-content">
+        <h2>Show Advertisement</h2>
+        <br />
+      
+        <!-- Form to Add or Update Ads -->
+        <form id="uploadAdForm" enctype="multipart/form-data">
+          <label for="adImage">Select an image (JPG/PNG, max 2 MB):</label>
+          <input
+            type="file"
+            id="adImage"
+            name="adImage"
+            accept="image/jpeg, image/png"
+            required
+          />
+          <br /><br />
+          <label for="adLink">Ad Link:</label>
+          <input
+            type="text"
+            id="adLink"
+            name="adLink"
+            placeholder="Enter a URL for the ad"
+            required
+          />
+          <br /><br />
+          <input type="hidden" id="adId" name="adId" />
+          <button type="submit">Upload</button>
+        </form>
+      
+        <hr />
+      
+        <!-- Section to Display Ads -->
+        <h3>Current Advertisements</h3>
+        <div id="adList"></div>
+      </div>
+      
+      <script>
+        // Fetch and display ads
+        function fetchAds() {
+          fetch("/api/showad")
+            .then((response) => response.json())
+            .then((data) => {
+              const adList = document.getElementById("adList");
+              adList.innerHTML = ""; // Clear previous content
+      
+              data.response.forEach((ad) => {
+                const adDiv = document.createElement("div");
+                adDiv.classList.add("ad-item");
+                adDiv.innerHTML = `
+                  <img src="${ad.image_url}" alt="Ad Image" width="150" />
+                  <p>Ad Link: <a href="${ad.target_url}" target="_blank">${ad.target_url}</a></p>
+                  <button onclick="editAd('${ad._id}', '${ad.target_url}')">Edit</button>
+                  <button onclick="deleteAd('${ad._id}')">Delete</button>
+                `;
+                adList.appendChild(adDiv);
+              });
+            })
+            .catch((error) => {
+              alert("Failed to fetch ads: " + error.message);
+            });
+        }
+      
+        // Populate form for editing an ad
+        function editAd(adId, adLink) {
+          document.getElementById("adId").value = adId;
+          document.getElementById("adLink").value = adLink;
+          document.getElementById("adImage").value = ""; // Clear file input (browser security)
+        }
+      
+        // Delete an ad
+        function deleteAd(adId) {
+          fetch(`/api/showad/delete`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ShowAdID: adId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert(data.message || "Ad deleted successfully!");
+              fetchAds(); // Refresh the ad list
+            })
+            .catch((error) => {
+              alert("Failed to delete ad: " + error.message);
+            });
+        }
+      
+        // Handle form submission for adding/updating ads
+        document.getElementById("uploadAdForm").addEventListener("submit", (event) => {
+          event.preventDefault();
+      
+          const adImage = document.getElementById("adImage").files[0];
+          const adLink = document.getElementById("adLink").value;
+          const adId = document.getElementById("adId").value;
+      
+          // Validate file size (must be 2 MB or smaller)
+          if (adImage && adImage.size > 2 * 1024 * 1024) {
+            alert("Image size must be 2 MB or smaller.");
+            return;
+          }
+      
+          const formData = new FormData();
+          formData.append("target_url", adLink);
+          if (adImage) {
+            formData.append("image_url", adImage);
+          }
+          if (adId) {
+            formData.append("ShowAdID", adId); // If updating, include the ad ID
+          }
+      
+          const endpoint = adId ? "/api/showad/update" : "/api/showad/store";
+      
+          // Send form data
+          fetch(endpoint, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert(data.message || "Ad saved successfully!");
+              document.getElementById("uploadAdForm").reset(); // Clear form
+              fetchAds(); // Refresh the ad list
+            })
+            .catch((error) => {
+              alert("An error occurred: " + error.message);
+            });
+        });
+      
+        // Initial fetch of ads
+        fetchAds();
+      </script>
+      
+      
+
+      <!-- Templates Tab Placeholder -->
+      <div id="templates" class="tab-content">
+        <h2>Templates (Coming Soon)</h2>
+      </div>
+    </div>
+
+    <script>
+      function showTab(tabId) {
+        const tabs = document.querySelectorAll(".tab-content");
+        tabs.forEach((tab) => tab.classList.remove("active"));
+
+        document.getElementById(tabId).classList.add("active");
+      }
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@ const express    = require('express')
 const mongoose   = require('mongoose')
 const morgan     = require('morgan')
 const bodyParser = require('body-parser')
-
+const path = require('path');
 const AuthRoute   = require('./routes/auth')
 const TemplateRoute   = require('./routes/template')
 const AppVersionRoute = require('./routes/appversion')
@@ -25,6 +25,15 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 //acces the file
 app.use('/uploads', express.static('uploads'))
+
+// Set the view engine (if using EJS)
+app.set('view engine', 'ejs');
+
+app.set('views', path.join(__dirname, 'views'));
+
+app.get('/', (req, res) => {
+  res.render('index');
+});
 
 const PORT = process.env.PORT || 3000
 
