@@ -2,6 +2,7 @@ const User   = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt    = require('jsonwebtoken')
 
+
 const register = (req, res, next) => {
     bcrypt.hash(req.body.password, 10, function(err, hashedpass) {
         if(err){
@@ -63,6 +64,33 @@ const login = (req, res, next) =>{
     })
 }
 
+const quickLogin = (req, res, next) => {
+    const email = req.body.email;
+
+    User.findOne({ email: email })
+        .then(user => {
+            if (user) {
+                res.json({
+                    message: 'Quick Login Successful!',
+                    user: {
+                        name: user.name,
+                        email: user.email,
+                        phone: user.phone
+                    }
+                });
+            } else {
+                res.json({
+                    message: 'No user found with this email!'
+                });
+            }
+        })
+        .catch(error => {
+            res.json({
+                message: 'An error occurred!',
+                error: error
+            });
+        });
+};
 module.exports = {
-    register, login
+    register, login, quickLogin
 }
