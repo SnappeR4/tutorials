@@ -10,7 +10,7 @@ const TemplateRoute   = require('./routes/template')
 const AppVersionRoute = require('./routes/appversion')
 const ShowADRoute     = require('./routes/showad')
 //mongodb://localhost:27017/testdb
-mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(process.env.MONGO_URL)
 const db = mongoose.connection
 db.on('error', (err)=> {
     console.log(err)
