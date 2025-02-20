@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express    = require('express')
 const mongoose   = require('mongoose')
 const morgan     = require('morgan')
@@ -7,8 +9,8 @@ const AuthRoute   = require('./routes/auth')
 const TemplateRoute   = require('./routes/template')
 const AppVersionRoute = require('./routes/appversion')
 const ShowADRoute     = require('./routes/showad')
-
-mongoose.connect('mongodb://localhost:27017/testdb', {useNewUrlParser: true, useUnifiedTopology: true})
+//mongodb://localhost:27017/testdb
+mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true})
 const db = mongoose.connection
 db.on('error', (err)=> {
     console.log(err)
