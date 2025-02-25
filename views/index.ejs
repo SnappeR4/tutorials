@@ -346,15 +346,14 @@
 
         <!-- Form to Add or Update Ads -->
         <form id="uploadAdForm" enctype="multipart/form-data">
-          <label for="adImage">Select an image (JPG/PNG, max 2 MB):</label>
+          <label for="adImage">Ad Image:</label>
           <input
-            type="file"
+            type="text"
             id="adImage"
             name="adImage"
-            accept="image/jpeg, image/png"
+            placeholder="Enter a URL for the ad Image"
             required
           />
-          <br /><br />
           <label for="adLink">Ad Link:</label>
           <input
             type="text"
@@ -503,12 +502,12 @@
                 const adDiv = document.createElement("div");
                 adDiv.classList.add("ad-item");
                 adDiv.innerHTML = `
-                    <img src="${ad.image_url}" alt="Ad Image" />
                     <div class="ad-details">
+                    <p>Image Link: <a href="${ad.image_url}" target="_blank">${ad.image_url}</a></p>
                     <p>Ad Link: <a href="${ad.target_url}" target="_blank">${ad.target_url}</a></p>
                     </div>
                     <div>
-                    <button class="edit-btn" onclick="editAd('${ad._id}', '${ad.target_url}')">Edit</button>
+                    <button class="edit-btn" onclick="editAd('${ad._id}', '${ad.target_url}', '${ad.image_url}')">Edit</button>
                     <button class="delete-btn" onclick="deleteAd('${ad._id}')">Delete</button>
                     </div>
                 `;
@@ -521,10 +520,10 @@
         }
 
         // Populate form for editing an ad
-        function editAd(adId, adLink) {
+        function editAd(adId, adLink, adImage) {
           document.getElementById("adId").value = adId;
           document.getElementById("adLink").value = adLink;
-          document.getElementById("adImage").value = ""; // Clear file input (browser security)
+          document.getElementById("adImage").value = adImage; // Clear file input (browser security)
         }
 
         // Delete an ad
@@ -547,50 +546,49 @@
         }
 
         // Handle form submission for adding/updating ads
-        document
-          .getElementById("uploadAdForm")
-          .addEventListener("submit", (event) => {
+        document.getElementById("uploadAdForm").addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const adImage = document.getElementById("adImage").files[0];
             const adLink = document.getElementById("adLink").value;
             const adId = document.getElementById("adId").value;
+            const adImage = document.getElementById("adImage").value; // Get the uploaded image file
 
-            // Validate file size (must be 2 MB or smaller)
-            if (adImage && adImage.size > 2 * 1024 * 1024) {
-              alert("Image size must be 2 MB or smaller.");
-              return;
+            if (!adImage) {
+                alert("Please select an image.");
+                return;
             }
 
-            const formData = new FormData();
-            formData.append("target_url", adLink);
-            if (adImage) {
-              formData.append("image_url", adImage);
-            }
+            const requestData = {
+                target_url: adLink,
+                image_url: adImage, // Send image URL instead of file
+            };
+
             if (adId) {
-              formData.append("ShowAdID", adId); // If updating, include the ad ID
+                requestData.ShowAdID = adId; // Include ID only if updating
             }
 
             const endpoint = adId ? "/api/showad/update" : "/api/showad/store";
 
-            // Send form data
-            fetch(endpoint, {
-              method: "POST",
-              body: formData,
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                alert(data.message || "Ad saved successfully!");
-                document.getElementById("uploadAdForm").reset(); // Clear form
-                fetchAds(); // Refresh the ad list
-              })
-              .catch((error) => {
-                alert("An error occurred: " + error.message);
-              });
-          });
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestData),
+                });
 
+                const data = await response.json();
+                alert(data.message || "Ad saved successfully!");
+                document.getElementById("uploadAdForm").reset();
+                fetchAds();
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+            }
+        });
         // Initial fetch of ads
         fetchAds();
+
       </script>
 
       <!-- Templates Tab Placeholder -->

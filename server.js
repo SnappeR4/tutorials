@@ -25,8 +25,6 @@ const app = express()
 app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
-//acces the file
-app.use('/uploads', express.static('uploads'))
 
 // Set the view engine (if using EJS)
 app.set('view engine', 'ejs');

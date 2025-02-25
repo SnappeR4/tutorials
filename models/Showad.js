@@ -1,15 +1,16 @@
 const mongoose = require('mongoose')
 const { type } = require('os')
-const Schema   = mongoose.Schema
 
-const showadSchema = new Schema({
+const ShowAdSchema = new mongoose.Schema({
     image_url: {
-        type: String
+        type: String,
+        required: true
     },
     target_url: {
-        type: String
-    },
-}, {timestamps: true})
+        type: String,
+        required: true
+    }
+}, { timestamps: true });
 
-const ShowAd = mongoose.model('ShowAd', showadSchema)
+const ShowAd = mongoose.model('ShowAd', ShowAdSchema)
 module.exports = ShowAd
