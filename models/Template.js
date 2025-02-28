@@ -6,6 +6,10 @@ const templateSchema = new Schema({
     name: {
         type: String
     },
+    mainCategory: {
+        type: String,
+        required: true
+    },
     templateCategory: {
         type: String
     },

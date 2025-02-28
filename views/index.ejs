@@ -597,18 +597,31 @@
         <br />
         <!-- Form to Add or Update Templates -->
         <form id="templateForm">
-            <label for="templateName">Template Name:</label>
-            <input type="text" id="templateName" name="templateName" placeholder="Enter template name" required />
-            <br /><br />
-            <label for="templateCategory">Category:</label>
-            <input type="text" id="templateCategory" name="templateCategory" placeholder="Enter category" required />
-            <br /><br />
-            <label for="jsonData">JSON Data:</label>
-            <textarea id="jsonData" name="jsonData" rows="8" placeholder="Enter JSON data" required></textarea>
-            <input type="hidden" id="templateId" name="templateId" />
-            <br /><br />
-            <button type="submit">Save Template</button>
-        </form>
+          <label for="templateName">Template Name:</label>
+          <input type="text" id="templateName" name="templateName" placeholder="Enter template name" required />
+          <br /><br />
+      
+          <label for="mainCategory">Main Category:</label>
+          <select id="mainCategory" name="mainCategory" required>
+              <option value="" disabled selected>Select a Main Category</option>
+              <option value="Commercial Retail">Commercial Retail</option>
+              <option value="Work Scenarios">Work Scenarios</option>
+              <option value="Festive Theme">Festive Theme</option>
+              <option value="Home Storage">Home Storage</option>
+          </select>
+          <br /><br />
+      
+          <label for="templateCategory">Category:</label>
+          <input type="text" id="templateCategory" name="templateCategory" placeholder="Enter category" required />
+          <br /><br />
+      
+          <label for="jsonData">JSON Data:</label>
+          <textarea id="jsonData" name="jsonData" rows="8" placeholder="Enter JSON data" required></textarea>
+          <input type="hidden" id="templateId" name="templateId" />
+          <br /><br />
+      
+          <button type="submit">Save Template</button>
+      </form>      
 
         <!-- Section to Display Templates -->
         <br/>
@@ -623,99 +636,83 @@
     <script>
     let allTemplates = []; // Store all fetched templates
 
-    function fetchTemplates() {
-    const templateList = document.getElementById("templateList");
+      function fetchTemplates() {
+          const templateList = document.getElementById("templateList");
 
-    // Show loading message while fetching templates
-    templateList.innerHTML = "<p>Loading templates...</p>";
+          // Show loading message while fetching templates
+          templateList.innerHTML = "<p>Loading templates...</p>";
 
-    fetch("/api/template")
-        .then((response) => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-        })
-        .then((data) => {
-        templateList.innerHTML = ""; // Clear the loading message
+          fetch("/api/template")
+              .then((response) => {
+                  if (!response.ok) {
+                      throw new Error(`HTTP error! Status: ${response.status}`);
+                  }
+                  return response.json();
+              })
+              .then((data) => {
+                  templateList.innerHTML = ""; // Clear the loading message
 
-        allTemplates = data.data || []; // Store all templates
+                  allTemplates = data.data || []; // Store all templates
 
-        if (allTemplates.length === 0) {
-            templateList.innerHTML = "<p>No templates found.</p>";
-            return;
-        }
+                  if (allTemplates.length === 0) {
+                      templateList.innerHTML = "<p>No templates found.</p>";
+                      return;
+                  }
 
-        renderTemplates(allTemplates); // Render the initial template list
-        })
-        .catch((error) => {
-        templateList.innerHTML = `<p class="error">Failed to fetch templates: ${error.message}</p>`;
-        });
-    }
+                  renderTemplates(allTemplates); // Render the initial template list
+              })
+              .catch((error) => {
+                  templateList.innerHTML = `<p class="error">Failed to fetch templates: ${error.message}</p>`;
+              });
+      }
 
-    function renderTemplates(templates) {
-    const templateList = document.getElementById("templateList");
-    templateList.innerHTML = ""; // Clear previous templates
+      function renderTemplates(templates) {
+          const templateList = document.getElementById("templateList");
+          templateList.innerHTML = ""; // Clear previous templates
 
-    // Create a table element
-    const table = document.createElement("table");
-    table.style.width = "100%";
-    table.style.borderCollapse = "collapse";
-    table.classList.add("styled-table");
-    
-    table.innerHTML = `
-        <thead>
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Category</th>
-            <th style="border: 1px solid #ddd; padding: 8px; ">JSON Data</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Actions</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    `;
+          // Create a table element
+          const table = document.createElement("table");
+          table.style.width = "100%";
+          table.style.borderCollapse = "collapse";
+          table.classList.add("styled-table");
+          
+          table.innerHTML = `
+              <thead>
+              <tr>
+                  <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">Main Category</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">Category</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">JSON Data</th>
+                  <th style="border: 1px solid #ddd; padding: 8px;">Actions</th>
+              </tr>
+              </thead>
+              <tbody></tbody>
+          `;
 
-    const tbody = table.querySelector("tbody");
+          const tbody = table.querySelector("tbody");
 
-    templates.forEach((template) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-        <td style="border: 1px solid #ddd; padding: 8px;">${template.name}</td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${template.templateCategory}</td>
-        <td style="border: 1px solid #ddd; padding: 8px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            ${template.jsonData}
-        </td>
-        <td style="border: 1px solid #ddd; padding: 8px;">
-            <button class="edit-btn" onclick="editTemplate('${template._id}', '${template.name}', '${template.templateCategory}', '${encodeURIComponent(template.jsonData)}')">Edit</button>
-            <button class="delete-btn" onclick="deleteTemplate('${template._id}')">Delete</button>
-        </td>
-        `;
+          templates.forEach((template) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+              <td style="border: 1px solid #ddd; padding: 8px;">${template.name}</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${template.mainCategory}</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${template.templateCategory}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  ${template.jsonData}
+              </td>
+              <td style="border: 1px solid #ddd; padding: 8px;">
+                  <button class="edit-btn" onclick="editTemplate('${template._id}', '${template.name}', '${template.mainCategory}', '${template.templateCategory}', '${encodeURIComponent(template.jsonData)}')">Edit</button>
+                  <button class="delete-btn" onclick="deleteTemplate('${template._id}')">Delete</button>
+              </td>
+              `;
 
-        tbody.appendChild(row);
-    });
+              tbody.appendChild(row);
+          });
 
-    templateList.appendChild(table);
-    }
+          templateList.appendChild(table);
+      }
 
-    // Filter templates based on search input
-    function filterTemplates() {
-    const searchInput = document.getElementById("searchInput").value.toLowerCase();
-    const filteredTemplates = allTemplates.filter((template) => 
-        template.name.toLowerCase().includes(searchInput) || 
-        template.templateCategory.toLowerCase().includes(searchInput)
-    );
-    renderTemplates(filteredTemplates); // Re-render the filtered templates
-    }
-
-    // Populate form for editing a template
-    function editTemplate(templateId, templateName, templateCategory, jsonData) {
-        document.getElementById("templateId").value = templateId;
-        document.getElementById("templateName").value = templateName;
-        document.getElementById("templateCategory").value = templateCategory;
-        document.getElementById("jsonData").value = jsonData;
-    }
-
-    // Delete a template
+// Delete a template
     function deleteTemplate(templateId) {
         fetch(`/api/template/delete`, {
             method: "POST",
@@ -740,44 +737,56 @@
         });
     }
 
-    // Handle form submission for adding/updating templates
-    document.getElementById("templateForm").addEventListener("submit", (event) => {
-        event.preventDefault();
+      // Populate form for editing a template
+      function editTemplate(templateId, templateName, mainCategory, templateCategory, jsonData) {
+          document.getElementById("templateId").value = templateId;
+          document.getElementById("templateName").value = templateName;
+          document.getElementById("mainCategory").value = mainCategory;
+          document.getElementById("templateCategory").value = templateCategory;
+          document.getElementById("jsonData").value = jsonData;
+      }
 
-        const templateName = document.getElementById("templateName").value;
-        const templateCategory = document.getElementById("templateCategory").value;
-        const jsonData = document.getElementById("jsonData").value;
-        const templateId = document.getElementById("templateId").value;
+      // Handle form submission for adding/updating templates
+      document.getElementById("templateForm").addEventListener("submit", (event) => {
+          event.preventDefault();
 
-        const formData = {
-        name: templateName,
-        templateCategory: templateCategory,
-        jsonData: jsonData,
-        };
-        if (templateId) formData.templateID = templateId;
+          const templateName = document.getElementById("templateName").value;
+          const mainCategory = document.getElementById("mainCategory").value;
+          const templateCategory = document.getElementById("templateCategory").value;
+          const jsonData = document.getElementById("jsonData").value;
+          const templateId = document.getElementById("templateId").value;
 
-        const endpoint = templateId ? "/api/template/update" : "/api/template/store";
+          const formData = {
+              name: templateName,
+              mainCategory: mainCategory,
+              templateCategory: templateCategory,
+              jsonData: jsonData,
+          };
+          if (templateId) formData.templateID = templateId;
 
-        fetch(endpoint, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            alert(data.message || "Template saved successfully!");
-            document.getElementById("templateForm").reset(); // Clear form
-            fetchTemplates(); // Refresh the template list
-        })
-        .catch((error) => {
-            alert("An error occurred: " + error.message);
-        });
-    });
+          const endpoint = templateId ? "/api/template/update" : "/api/template/store";
 
-    // Initial fetch of templates
-    fetchTemplates();
+          fetch(endpoint, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+          })
+          .then((response) => response.json())
+          .then((data) => {
+              alert(data.message || "Template saved successfully!");
+              document.getElementById("templateForm").reset(); // Clear form
+              fetchTemplates(); // Refresh the template list
+          })
+          .catch((error) => {
+              alert("An error occurred: " + error.message);
+          });
+      });
+
+      // Initial fetch of templates
+      fetchTemplates();
+
     </script>
 
     <div id="users" class="tab-content">

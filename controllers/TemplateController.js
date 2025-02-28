@@ -16,6 +16,40 @@ const index = async (req, res) => {
     }
 };
 
+// Get templates by main category
+const getByMainCategory = async (req, res) => {
+    try {
+        const { mainCategory } = req.body;
+
+        if (!mainCategory) {
+            return res.status(400).json({
+                success: false,
+                message: "Main category is required."
+            });
+        }
+
+        const templates = await Template.find({ mainCategory });
+
+        if (templates.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No templates found for this main category."
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: templates
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while fetching templates.",
+            error: error.message
+        });
+    }
+};
+
 // Show a single template
 const show = async (req, res) => {
     const { templateID } = req.body;
@@ -36,33 +70,38 @@ const show = async (req, res) => {
 
 // Add new template
 const store = async (req, res) => {
-    const { name, templateCategory, jsonData } = req.body;
+    const { name, mainCategory, templateCategory, jsonData } = req.body;
 
-    if (!name || !templateCategory || !jsonData) {
+    if (!name || !mainCategory || !templateCategory || !jsonData) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
     try {
-        const newTemplate = new Template({ name, templateCategory, jsonData });
+        const newTemplate = new Template({ name, mainCategory, templateCategory, jsonData });
         await newTemplate.save();
-        res.status(201).json({ success: true, message: 'Template added successfully.' });
+
+        res.status(201).json({ 
+            success: true, 
+            message: 'Template added successfully.', 
+            data: newTemplate 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'An error occurred while adding the template.' });
+        res.status(500).json({ success: false, message: 'An error occurred while adding the template.', error: error.message });
     }
 };
 
 // Update existing template
 const update = async (req, res) => {
-    const { templateID, name, templateCategory, jsonData } = req.body;
+    const { templateID, name, mainCategory, templateCategory, jsonData } = req.body;
 
-    if (!templateID || !name || !templateCategory || !jsonData) {
+    if (!templateID || !name || !mainCategory || !templateCategory || !jsonData) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
     try {
         const updatedTemplate = await Template.findByIdAndUpdate(
             templateID,
-            { name, templateCategory, jsonData },
+            { name, mainCategory, templateCategory, jsonData },
             { new: true } // Returns the updated document
         );
 
@@ -70,11 +109,16 @@ const update = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Template not found.' });
         }
 
-        res.status(200).json({ success: true, message: 'Template updated successfully.', data: updatedTemplate });
+        res.status(200).json({ 
+            success: true, 
+            message: 'Template updated successfully.', 
+            data: updatedTemplate 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'An error occurred while updating the template.' });
+        res.status(500).json({ success: false, message: 'An error occurred while updating the template.', error: error.message });
     }
 };
+
 
 // Delete template
 const destroy = async (req, res) => {
@@ -95,4 +139,4 @@ const destroy = async (req, res) => {
     }
 };
 
-module.exports = { index, show, store, update, destroy };
+module.exports = { index, show, getByMainCategory, store, update, destroy };
