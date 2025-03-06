@@ -19,7 +19,7 @@ const index = async (req, res) => {
 // Get templates by main category
 const getByMainCategory = async (req, res) => {
     try {
-        const { mainCategory } = req.body;
+        const { mainCategory } = req.query;
 
         if (!mainCategory) {
             return res.status(400).json({
