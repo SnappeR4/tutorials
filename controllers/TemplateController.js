@@ -50,6 +50,40 @@ const getByMainCategory = async (req, res) => {
     }
 };
 
+// Get templates by template category
+const getByTemplateCategory = async (req, res) => {
+    try {
+        const { templateCategory } = req.query;
+
+        if (!templateCategory) {
+            return res.status(400).json({
+                success: false,
+                message: "Template category is required."
+            });
+        }
+
+        const templates = await Template.find({ templateCategory });
+
+        if (templates.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No templates found for this template category."
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: templates
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while fetching templates.",
+            error: error.message
+        });
+    }
+};
+
 const category = async (req, res) => {
     try {
         // Fetch distinct values for mainCategory and templateCategory
@@ -155,4 +189,4 @@ const destroy = async (req, res) => {
     }
 };
 
-module.exports = { index, show, getByMainCategory, store, update, destroy, category };
+module.exports = { index, show, getByMainCategory, store, update, destroy, category, getByTemplateCategory };
