@@ -9,5 +9,6 @@ r̥outer.post('/store', TemplateController.store)
 r̥outer.get('/getByMainCategory', TemplateController.getByMainCategory)
 r̥outer.post('/update', TemplateController.update)
 r̥outer.post('/delete', TemplateController.destroy)
+r̥outer.get('/categories', TemplateController.category)
 
 module.exports = r̥outer

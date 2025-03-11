@@ -50,6 +50,22 @@ const getByMainCategory = async (req, res) => {
     }
 };
 
+const category = async (req, res) => {
+    try {
+        // Fetch distinct values for mainCategory and templateCategory
+        const mainCategories = await Template.distinct('mainCategory');
+        const templateCategories = await Template.distinct('templateCategory');
+
+        res.json({
+            success: true,
+            mainCategories,
+            templateCategories
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+}
 // Show a single template
 const show = async (req, res) => {
     const { templateID } = req.body;
@@ -139,4 +155,4 @@ const destroy = async (req, res) => {
     }
 };
 
-module.exports = { index, show, getByMainCategory, store, update, destroy };
+module.exports = { index, show, getByMainCategory, store, update, destroy, category };
