@@ -612,7 +612,9 @@
           <br /><br />
       
           <label for="templateCategory">Category:</label>
-          <input type="text" id="templateCategory" name="templateCategory" placeholder="Enter category" required />
+          <select id="templateCategory" name="templateCategory" required>
+              <option value="" disabled selected>Select a Category</option>
+          </select>
           <br /><br />
       
           <label for="jsonData">JSON Data:</label>
@@ -621,8 +623,8 @@
           <br /><br />
       
           <button type="submit">Save Template</button>
-      </form>      
-
+      </form>
+           
         <!-- Section to Display Templates -->
         <br/>
         <h3>Current Templates</h3>
@@ -633,6 +635,44 @@
 
     </div>
 
+          
+    <script>
+      document.getElementById("mainCategory").addEventListener("change", function () {
+          const categoryMap = {
+              "Commercial Retail": [
+                  "All", "Bakery", "Drinking", "Clothing", "Fresh Food/Seafood", "Grocery Store", 
+                  "Jewelry", "Gardening", "Digital Device", "Beauty & Personal Care", "Pet Supplies",
+                  "Contact Information", "Catering Service"
+              ],
+              "Work Scenarios": [
+                  "All", "School", "Hospital", "Laboratory", "Asset Tag", "Name Tag", "Employee Activities"
+              ],
+              "Festive Theme": [
+                  "All", "New Year", "Greeting & Wishes", "Thanking Wishes", "Valentine Day", 
+                  "Christmas", "Diwali"
+              ],
+              "Home Storage": [
+                  "Kitchen Storage", "Other Storage", "Laundry"
+              ]
+          };
+  
+          const mainCategory = this.value;
+          const templateCategory = document.getElementById("templateCategory");
+  
+          // Clear previous options
+          templateCategory.innerHTML = '<option value="" disabled selected>Select a Category</option>';
+  
+          if (mainCategory in categoryMap) {
+              categoryMap[mainCategory].forEach(category => {
+                  const option = document.createElement("option");
+                  option.value = category;
+                  option.textContent = category;
+                  templateCategory.appendChild(option);
+              });
+          }
+      });
+  </script>
+  
     <script>
     let allTemplates = []; // Store all fetched templates
 
