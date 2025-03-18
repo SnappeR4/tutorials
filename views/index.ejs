@@ -637,6 +637,61 @@
 
           
     <script>
+
+function renderTemplates(templates) {
+    const templateList = document.getElementById("templateList");
+    templateList.innerHTML = ""; // Clear previous templates
+
+    // Create a table element
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.classList.add("styled-table");
+    
+    table.innerHTML = `
+        <thead>
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Category</th>
+            <th style="border: 1px solid #ddd; padding: 8px; ">JSON Data</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector("tbody");
+
+    templates.forEach((template) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td style="border: 1px solid #ddd; padding: 8px;">${template.name}</td>
+        <td style="border: 1px solid #ddd; padding: 8px;">${template.templateCategory}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${template.jsonData}
+        </td>
+        <td style="border: 1px solid #ddd; padding: 8px;">
+            <button class="edit-btn" onclick="editTemplate('${template._id}', '${template.name}', '${template.templateCategory}', '${encodeURIComponent(template.jsonData)}')">Edit</button>
+            <button class="delete-btn" onclick="deleteTemplate('${template._id}')">Delete</button>
+        </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    templateList.appendChild(table);
+    }
+
+    // Filter templates based on search input
+    function filterTemplates() {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    const filteredTemplates = allTemplates.filter((template) => 
+        template.name.toLowerCase().includes(searchInput) || 
+        template.templateCategory.toLowerCase().includes(searchInput)
+    );
+    renderTemplates(filteredTemplates); // Re-render the filtered templates
+    }
+    
       document.getElementById("mainCategory").addEventListener("change", function () {
           const categoryMap = {
               "Commercial Retail": [
