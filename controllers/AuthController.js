@@ -2,34 +2,75 @@ const User   = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt    = require('jsonwebtoken')
 
+// Generate referral code using user ID and timestamp
+const generateReferralCode = (userId) => {
+    return `${userId.slice(-4)}${Date.now().toString().slice(-6)}`;
+};
 
-const register = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10, function(err, hashedpass) {
-        if(err){
-            res.json({
-                error: err
-            })
+const register = async (req, res, next) => {
+    try {
+        const { name, email, phone, password, referredBy } = req.body;
+
+        // Validate required fields
+        if (!name || !email || !phone || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
-        let user = new User({
-            name: req.body.name,
-            email: req.body.email,
-            phone: req.body.phone,
-            password: hashedpass
-        })
-        user.save()
-        .then(user => {
-            res.json({
-                message: 'User Added Successfully!'
-            })
-        })
-        .catch(error => {
-            res.json({
-                message: 'An error occured!'
-            })
-        })
-    })
-}
+        // Check if email or phone already exists
+        const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email or phone already in use' });
+        }
+
+        // Hash password
+        const hashedPass = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const user = new User({
+            name,
+            email,
+            phone,
+            password: hashedPass,
+            referredBy: referredBy || null,
+            hasPurchased: false,
+            rewardGiven: false
+        });
+
+        await user.save();
+
+        // Generate referral code based on user ID and timestamp
+        user.referralCode = generateReferralCode(user._id.toString());
+        await user.save();
+
+        res.status(201).json({ message: 'User Added Successfully!', referralCode: user.referralCode });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred!', error: error.message });
+    }
+};
+// Update hasPurchased and rewardGiven by user email
+const updateUserStatus = async (req, res) => {
+    try {
+        const { email } = req.query;  // Use req.query to get email from query parameters
+        const { hasPurchased, rewardGiven } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.hasPurchased = hasPurchased !== undefined ? hasPurchased : user.hasPurchased;
+        user.rewardGiven = rewardGiven !== undefined ? rewardGiven : user.rewardGiven;
+
+        await user.save();
+        res.json({ message: 'User status updated successfully!', user });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred!', error: error.message });
+    }
+};
 
 const login = (req, res, next) =>{
     var username = req.body.username
@@ -92,5 +133,5 @@ const quickLogin = (req, res, next) => {
         });
 };
 module.exports = {
-    register, login, quickLogin
+    register, login, quickLogin, updateUserStatus
 }
