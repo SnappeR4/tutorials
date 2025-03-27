@@ -10,6 +10,7 @@ const TemplateRoute   = require('./routes/template')
 const AppVersionRoute = require('./routes/appversion')
 const ShowADRoute     = require('./routes/showad')
 const BannerRoutes     = require('./routes/banner')
+const OrderRoutes      = require('./routes/order')
 //mongodb://localhost:27017/testdb
 mongoose.connect(process.env.MONGO_URL)
 const db = mongoose.connection
@@ -47,3 +48,4 @@ app.use('/api/appversion', AppVersionRoute)
 app.use('/api/showad', ShowADRoute)
 app.use('/api', AuthRoute)
 app.use('/api/shopping', BannerRoutes)
+app.use('/api/order', OrderRoutes)
