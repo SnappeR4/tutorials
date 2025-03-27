@@ -132,6 +132,29 @@ const quickLogin = (req, res, next) => {
             });
         });
 };
+
+const getReferredUsers = async (req, res) => {
+    try {
+        const { referralCode } = req.query; // Get referral code from query parameters
+
+        if (!referralCode) {
+            return res.status(400).json({ message: 'Referral code is required' });
+        }
+
+        // Find all users who were referred by the given referral code
+        const referredUsers = await User.find({ referredBy: referralCode }).select('name email hasPurchased rewardGiven');
+
+        if (referredUsers.length === 0) {
+            return res.status(404).json({ message: 'No referred users found' });
+        }
+
+        res.json({ message: 'Referred users retrieved successfully!', referredUsers });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred!', error: error.message });
+    }
+};
+
+
 module.exports = {
-    register, login, quickLogin, updateUserStatus
+    register, login, quickLogin, updateUserStatus, getReferredUsers
 }

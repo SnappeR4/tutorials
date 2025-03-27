@@ -5,6 +5,7 @@ const AuthController = require('../controllers/AuthController')
 
 r̥outer.post('/register', AuthController.register)
 r̥outer.put('/update-status', AuthController.updateUserStatus);
+r̥outer.get('/referred-users', AuthController.getReferredUsers);
 r̥outer.post('/login', AuthController.login)
 r̥outer.post('/quickLogin', AuthController.quickLogin)
 r̥outer.get("/users", async (req, res) => {
